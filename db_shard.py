@@ -1,8 +1,10 @@
 import pandas as pd
 import duckdb
-import queue
-from threading import Thread
-from dp_controller import output_queue
+from queue import Queue
+from threading import Thread, Lock
+
+outputs = Queue()
+query_lock = Lock()
 
 class db_shard:
     
@@ -10,29 +12,36 @@ class db_shard:
         
         self.id = id
         self.df = df
-        self.q_queue = queue.Queue()
+        self.queries = Queue()
+        
         self.cond = True
-        self.listener = Thread(target = listen, args = ())
-
+        self.listener = Thread(target = self.listen, args = ())
 
         create_table = f"CREATE TABLE {id} AS SELECT * FROM df;"
         duckdb.sql(create_table)
 
-
-
     def listen(self):
+        
+        print(f"{self.id} started.")
+        
         while(True):
-            query, output = self.q_queue.get()
-            output.put(duckdb.sql(query).df())
-            self.q_queue.task_done()
-
-
-    def make_query(query:str, Queue:output) -> None:
-        self.q_queue.put((query, output))
-
-
-    def forward(self, node:db_shard):
-
+            query = self.queries.get()
+            print(f"{self.id} received query: {query}")
+            
+            if (query == "done"):
+                break
+            
+            query_lock.acquire()
+            out = duckdb.query(query).df()
+            query_lock.release()
+            outputs.put(out)
+            
+        print(f"{self.id} ended.")
+        
+    def add_query(self, query):
+        
+        query = query.replace("database", self.id)
+        self.queries.put(query)
 
         
     def __str__(self) -> str:
