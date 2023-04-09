@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
-from db_shard import db_shard, outputs
+from commander_controller.db_shard import db_shard, outputs
 import threading
 import sys
 
 class db_controller:
     
-    def __init__(self) -> None:
+    def __init__(self, num_splits=5) -> None:
         
         ids = np.array(range(1,101))
         data = np.random.rand(100)
         data = np.multiply(data, 10)
         
-        self.num_splits = 5
+        self.num_splits = num_splits
         split_size = int(len(data) / self.num_splits)
         
         self.shards = []
