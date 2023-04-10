@@ -10,18 +10,13 @@ class Controller:
     def __init__(self, id:str, df: pd.DataFrame):
         
         self.id = id
-        self.queries = Queue()
-        self.listener = Thread(target = self.listen, args = ())
-        
+        self.queries = Queue()       
         self.table = Table(df)
 
     def listen(self):
         
-        # print(f"{self.id} started.")
-        
         while(True):
             query = self.queries.get()
-            # print(f"{self.id} received query: {query}")
             
             if (query == "done"):
                 break
@@ -30,8 +25,6 @@ class Controller:
             
             output = self.table.query(col, pred, val)
             outputs.put(output)
-            
-        # print(f"{self.id} ended.")
         
     def add_query(self, query):
         self.queries.put(query)
