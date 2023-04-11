@@ -3,7 +3,7 @@ from threading import Thread
 from util.table import Table
 import pandas as pd
 from collections.abc import Sequence
-
+from util.errors import NoConnections
 
 class StarNode:
     
@@ -17,6 +17,9 @@ class StarNode:
 
     def query(self, column: str, predicate: str, value: int) -> pd.DataFrame:
         """Execute query on all nodes and return result"""
+        if self.connections == None:
+            raise NoConnections
+
         connection_outputs = Queue()
         for connection in self.connections:
             x = Thread(target=connection._query, args=(connection_outputs, column, predicate, value))

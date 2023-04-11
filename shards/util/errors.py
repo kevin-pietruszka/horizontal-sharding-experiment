@@ -5,3 +5,7 @@ class InvalidPredicate(Exception):
 class InvalidInput(Exception):
     "Raised when query value is not allowed"
     pass
+
+class NoConnections(Exception):
+    "Raised no connections have been establish"
+    pass
