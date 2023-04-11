@@ -4,13 +4,15 @@ from util.table import Table
 import pandas as pd
 from collections.abc import Sequence
 from util.errors import NoConnections
+from network_transfer.Bandwidth import Bandwidth
 
 class StarNode:
     
-    def __init__(self, id:int, df:pd.DataFrame) -> None:
+    def __init__(self, id:int, df:pd.DataFrame, transfer_speed: float = 1) -> None:
         self.table = Table(df)
         self.id = id
         self.connections = None
+        self.connection = Bandwidth(transfer_speed)
     
     def set_connections(self, others: Sequence['StarNode']):
         self.connections = others
@@ -37,4 +39,5 @@ class StarNode:
 
     def _query(self, output_queue: Queue, column: str, predicate: str, value: int):
         my_output = self.table.query(column, predicate, value)
+        self.connection.send_df(my_output)
         output_queue.put(my_output)

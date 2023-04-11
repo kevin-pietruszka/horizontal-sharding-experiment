@@ -31,6 +31,7 @@ def main():
     chosen_node = random.randint(0, NUM_SERVERS - 1)
 
     query_output = nodes[chosen_node].query('id', 'EQ', 90)
+    print(query_output)
 
 if __name__ == "__main__":
     main()
