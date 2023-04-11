@@ -1,17 +1,20 @@
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 from util.table import Table
 import pandas as pd
-from collections.abc import Sequence
 from util.errors import NoConnections
+from network_transfer.Bandwidth import Bandwidth
+
+ring_lock = Lock()
 
 class RingNode:
 
-    def __init__(self, id:int, number_of_nodes: int, df:pd.DataFrame) -> None:
+    def __init__(self, id:int, number_of_nodes: int, df:pd.DataFrame, transfer_time:float = 1) -> None:
         self.table = Table(df)
         self.id = id
         self.num_nodes = number_of_nodes
         self.next = None
+        self.connection_next = Bandwidth(transfer_time)
     
     def set_link(self, next_node: 'RingNode'):
         self.next = next_node
@@ -43,4 +46,12 @@ class RingNode:
             x.start()
 
         my_output = self.table.query(column, predicate, value)
+
+        curr = self
+        ring_lock.acquire()
+        while (curr.next.id != original_id):
+            self.connection_next.send_df(my_output)
+            curr = curr.next
+        ring_lock.release()
+
         output_queue.put(my_output)
