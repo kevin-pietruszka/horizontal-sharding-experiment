@@ -3,6 +3,7 @@ from commander_controller.Controller import Controller, outputs
 import threading
 from typing import Union
 from util.errors import InvalidInput
+from sharding_methods.EvenSplit import even_split
 
 class Commander:
     
@@ -13,13 +14,12 @@ class Commander:
         
         self.shards = []
         self.threads = []
-        
-        for i in range(0, len(data), split_size):
-            
-            df = data.iloc[i: i + split_size]
-            
-            self.shards.append( Controller("my_table_" +  str(int(i / split_size)), df) )
 
+        splits = even_split(data, num_splits)
+
+        for index, df in enumerate(splits):
+            self.shards.append(Controller(index, df))
+            
     def execute_query(self, query:Union[str, tuple]) -> pd.DataFrame:
         
         if type(query) == str:
