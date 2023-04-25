@@ -1,7 +1,7 @@
 
 import numpy as np
 import pandas as pd
-from commander_controller.Commander import Commander
+from controller_worker.Controller import Controller
 
 def main():
     
@@ -13,7 +13,7 @@ def main():
     df["id"] = ids
     df["rating"] = ratings
 
-    client = Commander(df, num_splits=5)
+    client = Controller(df, num_splits=5)
     client.start_threads()
 
     query = ('id', 'GT', 90)

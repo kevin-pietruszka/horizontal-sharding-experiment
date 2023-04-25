@@ -1,16 +1,15 @@
 import pandas as pd
-from commander_controller.Controller import Controller, outputs
+from controller_worker.Worker import Worker, outputs
 import threading
 from typing import Union
 from util.errors import InvalidInput
 from sharding_methods.EvenSplit import even_split
 
-class Commander:
+class Controller:
     
     def __init__(self, data: pd.DataFrame, num_splits:int=5) -> None:
         
         self.num_splits = num_splits
-        split_size = int(len(data) / self.num_splits)
         
         self.shards = []
         self.threads = []
@@ -18,7 +17,7 @@ class Commander:
         splits = even_split(data, num_splits)
 
         for index, df in enumerate(splits):
-            self.shards.append(Controller(index, df))
+            self.shards.append(Worker(index, df))
             
     def execute_query(self, query:Union[str, tuple]) -> pd.DataFrame:
         
