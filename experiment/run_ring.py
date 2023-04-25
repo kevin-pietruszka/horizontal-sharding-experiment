@@ -28,7 +28,7 @@ def main():
     
     nodes[-1].set_link(nodes[0])
 
-    query_output = nodes[0].query('id', 'EQ', 90)
+    query_output = nodes[0].query('rating', 'GT', 9)
     print(query_output)
 
 if __name__ == "__main__":

@@ -43,4 +43,5 @@ class StarNode:
     def _query(self, output_queue: Queue, column: str, predicate: str, value: int):
         my_output = self.table.query(column, predicate, value)
         self.connection.send_df(my_output)
+        self.stats.update(my_output)
         output_queue.put(my_output)

@@ -49,12 +49,14 @@ class RingNode:
             x.start()
 
         my_output = self.table.query(column, predicate, value)
+        
 
         curr = self
         ring_lock.acquire()
         while (curr.next.id != original_id):
-            self.connection_next.send_df(my_output)
+            curr.connection_next.send_df(my_output)
             curr = curr.next
         ring_lock.release()
 
+        self.stats.update(my_output)
         output_queue.put(my_output)
