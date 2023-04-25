@@ -5,6 +5,7 @@ import pandas as pd
 from collections.abc import Sequence
 from util.errors import NoConnections
 from network_transfer.Bandwidth import Bandwidth
+from my_statistics.StatisticsTable import StatisticsTable
 
 class StarNode:
     
@@ -13,6 +14,7 @@ class StarNode:
         self.id = id
         self.connections = None
         self.connection = Bandwidth(transfer_speed)
+        self.stats = StatisticsTable()
     
     def set_connections(self, others: Sequence['StarNode']):
         self.connections = others
@@ -29,6 +31,7 @@ class StarNode:
 
         # Execute Query on this device
         output_df = self.table.query(column, predicate, value)
+        self.stats.update(output_df)
 
         # Combine output
         for i in range(len(self.connections)):

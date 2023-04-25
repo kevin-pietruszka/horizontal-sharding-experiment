@@ -4,6 +4,7 @@ from util.table import Table
 import pandas as pd
 from util.errors import NoConnections
 from network_transfer.Bandwidth import Bandwidth
+from my_statistics.StatisticsTable import StatisticsTable
 
 ring_lock = Lock()
 
@@ -15,6 +16,7 @@ class RingNode:
         self.num_nodes = number_of_nodes
         self.next = None
         self.connection_next = Bandwidth(transfer_time)
+        self.stats = StatisticsTable()
     
     def set_link(self, next_node: 'RingNode'):
         self.next = next_node
@@ -30,6 +32,7 @@ class RingNode:
 
         # Execute Query on this device
         output_df = self.table.query(column, predicate, value)
+        self.stats.update(output_df)
 
         # Combine output
         for i in range(self.num_nodes - 1):
