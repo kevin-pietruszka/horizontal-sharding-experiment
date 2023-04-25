@@ -4,6 +4,7 @@ import pandas as pd
 from star_network.StarNode import StarNode
 from sharding_methods.EvenSplit import even_split
 import random
+from my_statistics.StatisticsTable import StatisticsTable
 
 NUM_SERVERS = 5
 
@@ -32,9 +33,13 @@ def main():
 
     query_output = nodes[chosen_node].query('rating', 'GT', 0)
     print(query_output)
+    stats = []
     for i in range(len(nodes)):
+        stats.append(nodes[i].stats)
         print(nodes[i].stats.counts)
 
+    nd_arr = StatisticsTable.combine(len(df), stats)
+    print(nd_arr)
 
 if __name__ == "__main__":
     main()
