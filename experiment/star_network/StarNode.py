@@ -6,15 +6,18 @@ from collections.abc import Sequence
 from util.errors import NoConnections
 from network_transfer.Bandwidth import Bandwidth
 from my_statistics.StatisticsTable import StatisticsTable
+from typing import Union
+import sympy
 
 class StarNode:
     
-    def __init__(self, id:int, df:pd.DataFrame, transfer_speed: float = 1) -> None:
+    def __init__(self, id:int, df:pd.DataFrame, transfer_speed: float = 1, interval: Union[sympy.Interval, None] = None) -> None:
         self.table = Table(df)
         self.id = id
         self.connections = None
         self.connection = Bandwidth(transfer_speed)
         self.stats = StatisticsTable()
+        self.interval = interval
     
     def set_connections(self, others: Sequence['StarNode']):
         self.connections = others

@@ -5,18 +5,21 @@ import pandas as pd
 from util.errors import NoConnections
 from network_transfer.Bandwidth import Bandwidth
 from my_statistics.StatisticsTable import StatisticsTable
+from typing import Union
+import sympy
 
 ring_lock = Lock()
 
 class RingNode:
 
-    def __init__(self, id:int, number_of_nodes: int, df:pd.DataFrame, transfer_time:float = 1) -> None:
+    def __init__(self, id:int, number_of_nodes: int, df:pd.DataFrame, transfer_time:float = 1, interval: Union[sympy.Interval, None] = None) -> None:
         self.table = Table(df)
         self.id = id
         self.num_nodes = number_of_nodes
         self.next = None
         self.connection_next = Bandwidth(transfer_time)
         self.stats = StatisticsTable()
+        self.interval = interval
     
     def set_link(self, next_node: 'RingNode'):
         self.next = next_node

@@ -10,7 +10,6 @@ def predicate_split(df: pd.DataFrame, column: str, predicates: List[sp.Interval]
     
     for i in range(num_splits):
         interval = predicates[i]
-        # print(interval)
         indices = []
         
         for index, val in enumerate(df[column]):
