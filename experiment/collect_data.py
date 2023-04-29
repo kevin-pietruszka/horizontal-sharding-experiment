@@ -48,6 +48,7 @@ def main():
 
     ouput_arr = StatisticsTable.combine(len(df), stats)
     with open('./data/stats.npy', 'wb') as f:
+        df.to_csv("./data/stats_df.csv")
         np.save(f, ouput_arr)
 
 
