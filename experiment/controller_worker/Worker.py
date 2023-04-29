@@ -19,6 +19,15 @@ class Worker:
         self.connection = Bandwidth(transfer_speed)
         self.stats = StatisticsTable()
         self.interval = interval
+        self.columns = df.columns
+
+        if self.interval == None:
+            col = df['rating']
+            _min = col.min()
+            _max = col.max()
+            self.interval = sympy.Interval(_min, _max)
+        else:
+            self.interval = interval
 
     def listen(self):
         
@@ -31,10 +40,14 @@ class Worker:
                 
                 col, pred, val = query
                 
-                output = self.table.query(col, pred, val)
-                self.stats.update(output)
+                if query_in_interval(pred, val, self.interval):
+                    output = self.table.query(col, pred, val)
+                    self.stats.update(output)
+                    self.connection.send_df(output)
+                else:
+                    output = pd.DataFrame(columns=self.columns)
+                    self.connection.send_df(output)
 
-                self.connection.send_df(output)
                 outputs.put(output)
             except:
                 break

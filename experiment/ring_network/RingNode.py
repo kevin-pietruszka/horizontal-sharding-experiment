@@ -6,6 +6,7 @@ from util.errors import NoConnections
 from network_transfer.Bandwidth import Bandwidth
 from my_statistics.StatisticsTable import StatisticsTable
 from typing import Union
+from util.predicates import query_in_interval
 import sympy
 
 ring_lock = Lock()
@@ -20,6 +21,15 @@ class RingNode:
         self.connection_next = Bandwidth(transfer_time)
         self.stats = StatisticsTable()
         self.interval = interval
+        self.columns = df.columns
+
+        if self.interval == None:
+            col = df['rating']
+            _min = col.min()
+            _max = col.max()
+            self.interval = sympy.Interval(_min, _max)
+        else:
+            self.interval = interval
     
     def set_link(self, next_node: 'RingNode'):
         self.next = next_node
@@ -37,6 +47,11 @@ class RingNode:
         output_df = self.table.query(column, predicate, value)
         self.stats.update(output_df)
 
+        if query_in_interval(predicate, value, self.interval):
+            output_df = self.table.query(column, predicate, value)
+        else:
+            output_df = pd.DataFrame(columns=self.columns)
+            
         # Combine output
         for i in range(self.num_nodes - 1):
             res = connection_outputs.get()
@@ -51,15 +66,17 @@ class RingNode:
             x = Thread(target=self.next._query, args=(original_id, output_queue, column, predicate, value))
             x.start()
 
-        my_output = self.table.query(column, predicate, value)
+        if query_in_interval(predicate, value, self.interval):
+            output = self.table.query(column, predicate, value)
+        else:
+            output = pd.DataFrame(columns=self.columns)
         
-
         curr = self
         ring_lock.acquire()
         while (curr.next.id != original_id):
-            curr.connection_next.send_df(my_output)
+            curr.connection_next.send_df(output)
             curr = curr.next
         ring_lock.release()
 
-        self.stats.update(my_output)
-        output_queue.put(my_output)
+        output_queue.put(output)
+        self.stats.update(output)
