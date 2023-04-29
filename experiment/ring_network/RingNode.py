@@ -45,7 +45,6 @@ class RingNode:
 
         # Execute Query on this device
         output_df = self.table.query(column, predicate, value)
-        self.stats.update(output_df)
 
         if query_in_interval(predicate, value, self.interval):
             output_df = self.table.query(column, predicate, value)
@@ -57,6 +56,7 @@ class RingNode:
             res = connection_outputs.get()
             output_df = pd.concat([output_df, res])
 
+        self.stats.update(output_df)
         return output_df
     
 
@@ -79,4 +79,3 @@ class RingNode:
         ring_lock.release()
 
         output_queue.put(output)
-        self.stats.update(output)

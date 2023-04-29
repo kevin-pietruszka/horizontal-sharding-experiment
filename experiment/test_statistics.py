@@ -31,12 +31,14 @@ def main():
 
     chosen_node = random.randint(0, NUM_SERVERS - 1)
 
-    query_output = nodes[chosen_node].query('rating', 'GT', 0)
-    print(query_output)
+    # query_output = nodes[chosen_node].query('rating', 'GT', 0)
+    # print(query_output)
+
     stats = []
     for i in range(len(nodes)):
+        nodes[i].query('rating', 'GT', 0)
         stats.append(nodes[i].stats)
-        print(nodes[i].stats.counts)
+        # print(nodes[i].stats.counts)
 
     nd_arr = StatisticsTable.combine(len(df), stats)
     print(nd_arr)

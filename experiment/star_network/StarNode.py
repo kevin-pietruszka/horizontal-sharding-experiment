@@ -44,19 +44,18 @@ class StarNode:
 
         # Execute Query on this device
         output_df = self.table.query(column, predicate, value)
-        self.stats.update(output_df)
-
+        
         # Combine output
         for i in range(len(self.connections)):
             res = connection_outputs.get()
             output_df = pd.concat([output_df, res])
 
+        self.stats.update(output_df)
         return output_df
 
     def _query(self, output_queue: Queue, column: str, predicate: str, value: int):
         if query_in_interval(predicate, value, self.interval):
             output = self.table.query(column, predicate, value)
-            self.stats.update(output)
             self.connection.send_df(output)
         else:
             output = pd.DataFrame(columns=self.columns)

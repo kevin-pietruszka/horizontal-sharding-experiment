@@ -43,4 +43,4 @@ def query_in_interval(predicate: str, value: int, interval: sympy.Interval) -> b
     
     pred = pred.as_set()
     output = interval.intersect(pred)
-    return output.is_empty
+    return not output.is_empty

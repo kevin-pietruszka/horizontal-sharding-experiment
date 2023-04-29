@@ -17,7 +17,6 @@ class Worker:
         self.queries = Queue()       
         self.table = Table(df)
         self.connection = Bandwidth(transfer_speed)
-        self.stats = StatisticsTable()
         self.interval = interval
         self.columns = df.columns
 
@@ -42,7 +41,6 @@ class Worker:
                 
                 if query_in_interval(pred, val, self.interval):
                     output = self.table.query(col, pred, val)
-                    self.stats.update(output)
                     self.connection.send_df(output)
                 else:
                     output = pd.DataFrame(columns=self.columns)
