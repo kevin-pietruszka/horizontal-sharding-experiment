@@ -31,5 +31,10 @@ class StatisticsTable:
             for key, val in stats_dict.items():
                 
                 frequencies[int(key) - 1][i] = val
-                
+        
+        for j in range(num_shards):
+            column = frequencies[:, j]
+            _sum = np.sum(column)
+            column = np.divide(column, _sum)
+            frequencies[:, j] = column
         return frequencies
