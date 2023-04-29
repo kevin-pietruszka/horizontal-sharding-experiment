@@ -12,7 +12,7 @@ outputs = Queue()
 class Worker:
     
     def __init__(self, id:int, df: pd.DataFrame, transfer_speed: float = 1, interval: Union[sympy.Interval, None] = None):
-        
+
         self.id = id
         self.queries = Queue()       
         self.table = Table(df)
@@ -23,18 +23,21 @@ class Worker:
     def listen(self):
         
         while(True):
-            query = self.queries.get()
+            try:
+                query = self.queries.get()
             
-            if (query == "done"):
-                break
-            
-            col, pred, val = query
-            
-            output = self.table.query(col, pred, val)
-            self.stats.update(output)
+                if (query == "done"):
+                    break
+                
+                col, pred, val = query
+                
+                output = self.table.query(col, pred, val)
+                self.stats.update(output)
 
-            self.connection.send_df(output)
-            outputs.put(output)
+                self.connection.send_df(output)
+                outputs.put(output)
+            except:
+                break
         
     def add_query(self, query):
         self.queries.put(query)

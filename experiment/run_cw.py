@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from controller_worker.Controller import Controller
+from sharding_methods.EvenSplit import even_split
 
 def main():
     
@@ -13,10 +14,12 @@ def main():
     df["id"] = ids
     df["rating"] = ratings
 
-    client = Controller(df, num_splits=5)
+    splits = even_split(df, 5)
+
+    client = Controller(splits)
     client.start_threads()
 
-    query = ('id', 'GT', 90)
+    query = ('rating', 'GT', 8)
     output = client.execute_query(query)
     print(output)
 

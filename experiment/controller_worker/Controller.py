@@ -3,21 +3,23 @@ from controller_worker.Worker import Worker, outputs
 import threading
 from typing import Union
 from util.errors import InvalidInput
-from sharding_methods.EvenSplit import even_split
+from typing import List
+import sympy
 
 class Controller:
     
-    def __init__(self, data: pd.DataFrame, num_splits:int=5) -> None:
-        
-        self.num_splits = num_splits
+    def __init__(self, splits: List[pd.DataFrame], predicates: List[sympy.Interval] = None) -> None:
         
         self.shards = []
         self.threads = []
+        self.num_splits = len(splits)
 
-        splits = even_split(data, num_splits)
-
-        for index, df in enumerate(splits):
-            self.shards.append(Worker(index, df))
+        if predicates != None:
+            for index, df in enumerate(splits):
+                self.shards.append(Worker(id=index, df=df, interval=predicates[index]))
+        else:
+            for index, df in enumerate(splits):
+                self.shards.append(Worker(id=index, df=df))
             
     def execute_query(self, query:Union[str, tuple]) -> pd.DataFrame:
         
