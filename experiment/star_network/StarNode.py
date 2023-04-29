@@ -4,6 +4,7 @@ from util.table import Table
 import pandas as pd
 from collections.abc import Sequence
 from util.errors import NoConnections
+from util.predicates import query_in_interval
 from network_transfer.Bandwidth import Bandwidth
 from my_statistics.StatisticsTable import StatisticsTable
 from typing import Union
@@ -18,6 +19,15 @@ class StarNode:
         self.connection = Bandwidth(transfer_speed)
         self.stats = StatisticsTable()
         self.interval = interval
+        self.columns = df.columns
+
+        if self.interval == None:
+            col = df['rating']
+            _min = col.min()
+            _max = col.max()
+            self.interval = sympy.Interval(_min, _max)
+        else:
+            self.interval = interval
     
     def set_connections(self, others: Sequence['StarNode']):
         self.connections = others
@@ -44,7 +54,11 @@ class StarNode:
         return output_df
 
     def _query(self, output_queue: Queue, column: str, predicate: str, value: int):
-        my_output = self.table.query(column, predicate, value)
-        self.connection.send_df(my_output)
-        self.stats.update(my_output)
-        output_queue.put(my_output)
+        if query_in_interval(predicate, value, self.interval):
+            output = self.table.query(column, predicate, value)
+            self.stats.update(output)
+            self.connection.send_df(output)
+        else:
+            output = pd.DataFrame(columns=self.columns)
+            self.connection.send_df(output)
+        output_queue.put(output)
