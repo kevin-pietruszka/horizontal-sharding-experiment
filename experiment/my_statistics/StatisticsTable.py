@@ -30,7 +30,8 @@ class StatisticsTable:
             
             for key, val in stats_dict.items():
                 
-                frequencies[int(key) - 1][i] = val
+                r = int(key) - 1
+                frequencies[r, i] = val
         
         for j in range(num_shards):
             column = frequencies[:, j]
