@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 from star_network.StarNode import StarNode
-from sharding_methods.EvenSplit import even_split
+from sharding_methods.Predicate import predicate_split
 from my_statistics.StatisticsTable import StatisticsTable
+from util.predicates import predicate_interval
 import random
 
 NUM_SERVERS = 5
@@ -10,7 +11,7 @@ NUM_QUERIES = 100
 COLUMN = 'rating'
 PRED_CHOICES = ['LT', 'LE', 'GT', 'GE']
 VALUE_RANGE = [0, 10]
-DATA_SIZE_SET = [100, 1000, 10000]
+DATA_SIZE_SET = [100, 1000]
 
 def main():
     
@@ -24,7 +25,8 @@ def main():
         df["rating"] = ratings
 
         # Can be any split
-        frames = even_split(df,NUM_SERVERS)
+        intervals = predicate_interval(VALUE_RANGE, NUM_SERVERS)
+        frames = predicate_split(df, COLUMN, intervals)
         
         # Build 
         nodes = []
@@ -42,8 +44,14 @@ def main():
         for i in range(NUM_QUERIES):
             chosen_node = random.randint(0, NUM_SERVERS - 1)
             pred = random.choice(PRED_CHOICES)
-            val = random.uniform(VALUE_RANGE[0], VALUE_RANGE[1])
-            queries.append((pred, val))
+
+            if 'L' in pred:
+                val = (chosen_node+1) * 10 / NUM_SERVERS
+            else:
+                val = (chosen_node) * 10 / NUM_SERVERS
+            
+            # val = random.uniform(VALUE_RANGE[0], VALUE_RANGE[1])
+            queries.append((chosen_node, pred, val))
             nodes[chosen_node].query(COLUMN, pred, val)
         
         # Collect the statistics
@@ -58,7 +66,7 @@ def main():
         
         with open(f'./data/queries_{data_size}.txt', 'w') as qf:
             for q in queries:
-                qf.write(str(q[0]) + ',' + str(q[1]))
+                qf.write(str(q[0]) + ',' + str(q[1]) + ',' + str(q[2]))
                 qf.write('\n')
     
         df.to_csv(f"./data/stats_df_{data_size}.csv")
